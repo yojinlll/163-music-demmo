@@ -50,6 +50,17 @@
         data: {
             name: '', singer: '', url: '', id: ''
         },
+        update(data){
+            var song = AV.Object.createWithoutData('Song', this.data.id)
+            song.set('name', data.name)
+            song.set('singer', data.singer)
+            song.set('url', data.url)
+            return song.save()
+                .then((response)=>{
+                    Object.assign(this.data, data)
+                    return response
+                })
+        },
         create(data) {              // 将提交的数据传入 leancould
             var Song = AV.Object.extend('Song');
             var song = new Song();
@@ -72,35 +83,58 @@
             this.model = model
             this.view.render(this.model.data)
             this.bindEvents()
-            
+
             window.eventHub.on('select', (data) => {
                 this.model.data = data
                 this.view.render(this.model.data)
             })
-            window.eventHub.on('new',(data)=>{
-                if(this.model.data.id){
+            window.eventHub.on('new', (data) => {
+                if (this.model.data.id) {
                     this.model.data = { name: '', singer: '', url: '', id: '' }
-                }else{
+                } else {
                     Object.assign(this.model.data, data)
                 }
                 this.view.render(this.model.data)
             })
         },
+        create() {
+            let needs = 'name singer url'.split(' ')
+            let data = {}
+            needs.map((string) => {
+                data[string] = this.view.$el.find(`[name=${string}]`).val()
+            })
+            this.model.create(data)
+                .then(() => {
+                    this.view.reset()       // 数据传入 leancould 后重置输入框
+                    let string = JSON.stringify(this.model.data)        // 避免旧内存地址导致 bug ，用深拷贝赋予新内存地址
+                    let object = JSON.parse(string)
+                    window.eventHub.emit('create', object)
+                })
+        },
+        update() {
+            let needs = 'name singer url'.split(' ')
+            let data = {}
+            needs.map((string) => {
+                data[string] = this.view.$el.find(`[name=${string}]`).val()
+            })
+            this.model.update(data)
+                .then(()=>{
+                    window.eventHub.emit('update',JSON.parse(JSON.stringify(this.model.data)))
+                })
+            
+        },
         bindEvents() {       // 获取提交的字符串 name singer url
             this.view.$el.on('submit', 'form', (e) => {
                 e.preventDefault()
-                let needs = 'name singer url'.split(' ')
-                let data = {}
-                needs.map((string) => {
-                    data[string] = this.view.$el.find(`[name=${string}]`).val()
-                })
-                this.model.create(data)
-                    .then(() => {
-                        this.view.reset()       // 数据传入 leancould 后重置输入框
-                        let string = JSON.stringify(this.model.data)        // 避免旧内存地址导致 bug ，用深拷贝赋予新内存地址
-                        let object = JSON.parse(string)
-                        window.eventHub.emit('create', object)
-                    })
+
+                if (this.model.data.id) {
+                    this.update()
+                } else {
+                    this.create()
+                }
+
+
+
             })
 
         }
