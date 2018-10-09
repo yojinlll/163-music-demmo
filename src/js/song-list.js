@@ -14,7 +14,7 @@
             )
             $el.find('ul').empty()
             liList.map((domLi) => {
-                $el.find('ul').append(domLi)     
+                $el.find('ul').append(domLi)
             })
         },
         clearActive() {
@@ -24,6 +24,15 @@
     let model = {
         data: {
             songs: []
+        },
+        find(){
+            var query = new AV.Query('Song');                   // 创建 leancould Song class 实例
+            return query.find().then((songs)=>{
+                this.data.songs = songs.map((song)=>{           // 将 Song class 中歌曲数据传给 data，但得到的 class 数据被封装过，用map去封装 
+                    return {id:song.id,...song.attributes}
+                })
+                return songs
+            })
         }
     }
     let controller = {
@@ -38,7 +47,11 @@
                 this.model.data.songs.push(songData)
                 this.view.render(this.model.data)
             })
+            this.model.find().then(()=>{
+                this.view.render(this.model.data)
+            })
         }
+
     }
     controller.init(view, model)
 
