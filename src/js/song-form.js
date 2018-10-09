@@ -5,7 +5,6 @@
             this.$el = $(this.el)
         },
         template: `
-        <h1>新建歌曲</h1>
         <form class="form">
             <div class="row">
                 <label>
@@ -35,11 +34,15 @@
             let html = this.template
             placeholders.map((string) => {
                 html = html.replace(`__${string}__`, data[string] || '')        // __${string}__ 替换成 data[string]
-                console.log(data[string])
             })
             $(this.el).html(html)
+            if (data.id) {
+                $(this.el).prepend('<h1>编辑歌曲</h1>')
+            } else {
+                $(this.el).prepend('<h1>新建歌曲</h1>')
+            }
         },
-        reset(){
+        reset() {
             this.render({})
         }
     }
@@ -73,9 +76,12 @@
                 this.model.data = data
                 this.view.render(this.model.data)
             })
-            window.eventHub.on('select',(data)=>{
+            window.eventHub.on('select', (data) => {
                 this.model.data = data
-                console.log(data)
+                this.view.render(this.model.data)
+            })
+            window.eventHub.on('new',()=>{
+                this.model.data = { name: '', singer: '', url: '', id: '' }
                 this.view.render(this.model.data)
             })
         },
@@ -85,14 +91,14 @@
                 let needs = 'name singer url'.split(' ')
                 let data = {}
                 needs.map((string) => {
-                    data[string] =this.view.$el.find(`[name=${string}]`).val()
+                    data[string] = this.view.$el.find(`[name=${string}]`).val()
                 })
                 this.model.create(data)
-                    .then(()=>{
+                    .then(() => {
                         this.view.reset()       // 数据传入 leancould 后重置输入框
                         let string = JSON.stringify(this.model.data)        // 避免旧内存地址导致 bug ，用深拷贝赋予新内存地址
                         let object = JSON.parse(string)
-                        window.eventHub.emit('create',object)
+                        window.eventHub.emit('create', object)
                     })
             })
 
