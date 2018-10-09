@@ -34,7 +34,8 @@
             let placeholders = ['name', 'url', 'singer', 'id']
             let html = this.template
             placeholders.map((string) => {
-                html = html.replace(`__${string}__`, data[string] || '')
+                html = html.replace(`__${string}__`, data[string] || '')        // __${string}__ 替换成 data[string]
+                console.log(data[string])
             })
             $(this.el).html(html)
         },
@@ -70,6 +71,11 @@
             this.bindEvents()
             window.eventHub.on('upload', (data) => {
                 this.model.data = data
+                this.view.render(this.model.data)
+            })
+            window.eventHub.on('select',(data)=>{
+                this.model.data = data
+                console.log(data)
                 this.view.render(this.model.data)
             })
         },

@@ -10,17 +10,17 @@
             $el.html(this.template)
             let { songs } = data
             let liList = songs.map((song) =>
-                $('<li></li>').text(song.name).attr('data-song-id',song.id)      // <li>song.name</li>
+                $('<li></li>').text(song.name).attr('data-song-id', song.id)      // <li>song.name</li>
             )
             $el.find('ul').empty()
             liList.map((domLi) => {
                 $el.find('ul').append(domLi)
             })
         },
-        activeItem(li){
+        activeItem(li) {
             let $li = $(li)
             $li.addClass('active')
-                    .siblings('.active').removeClass('active')
+                .siblings('.active').removeClass('active')
         },
         clearActive() {
             $(this.el).find('.active').removeClass('active')
@@ -58,7 +58,16 @@
             $(this.view.el).on('click', 'li', (e) => {
                 this.view.activeItem(e.currentTarget)
                 let songId = e.currentTarget.getAttribute('data-song-id')
-                window.eventHub.emit('select',{id:songId})
+                let data
+                let songs = this.model.data.songs
+                for (let i = 0; i < songs.length; i++) {        // 匹配 id ，将歌曲信息传给data
+                    if (songs[i].id === songId) {
+                        data = songs[i]
+                        break
+                    }
+                }
+                // 深拷贝，避免引用同一个地址出 bug
+                window.eventHub.emit('select', JSON.parse(JSON.stringify(data)))
             })
         },
         bindEventsHub() {
