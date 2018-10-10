@@ -8,10 +8,14 @@
         render(data) {         // 将歌名以 <li> 渲染到 <ul> 中
             let $el = $(this.el)
             $el.html(this.template)
-            let { songs } = data
-            let liList = songs.map((song) =>
-                $('<li></li>').text(song.name).attr('data-song-id', song.id)      // <li>song.name</li>
-            )
+            let {songs,selectSongId} = data
+            let liList = songs.map((song) => {
+                let $li = $('<li></li>').text(song.name).attr('data-song-id', song.id)      // <li>song.name</li>
+                if(song.id === selectSongId){
+                    $li.addClass('active')
+                }
+                return $li
+            })
             $el.find('ul').empty()
             liList.map((domLi) => {
                 $el.find('ul').append(domLi)
@@ -28,7 +32,8 @@
     }
     let model = {
         data: {
-            songs: []
+            songs: [],
+            selectSongId: undefined,
         },
         find() {
             var query = new AV.Query('Song');                   // 创建 leancould Song class 实例
@@ -57,8 +62,12 @@
         },
         bindEvents() {
             $(this.view.el).on('click', 'li', (e) => {
-                this.view.activeItem(e.currentTarget)
                 let songId = e.currentTarget.getAttribute('data-song-id')
+
+                // 用于更新后再次 active 选项
+                this.model.data.selectSongId = songId
+                this.view.render(this.model.data)
+
                 let data
                 let songs = this.model.data.songs
                 for (let i = 0; i < songs.length; i++) {        // 匹配 id ，将歌曲信息传给data
@@ -76,15 +85,15 @@
                 this.model.data.songs.push(songData)
                 this.view.render(this.model.data)
             })
-            window.eventHub.on('new',()=>{
+            window.eventHub.on('new', () => {
                 this.view.clearActive()
             })
-            window.eventHub.on('update',(song)=>{
+            window.eventHub.on('update', (song) => {
                 console.log(11111111111111111111)
                 console.log(song)
                 let songs = this.model.data.songs
-                for(let i=0; i<songs.length; i++){
-                    if(songs[i].id === song.id){
+                for (let i = 0; i < songs.length; i++) {
+                    if (songs[i].id === song.id) {
                         Object.assign(songs[i], song)
                     }
                 }
