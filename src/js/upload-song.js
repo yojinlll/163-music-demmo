@@ -33,6 +33,7 @@
                         });
                     },
                     'BeforeUpload': function (up, file) {
+                        window.eventHub.emit('beforeUpload')
                         // 每个文件上传前,处理相关的事情
                     },
                     'UploadProgress': function (up, file) {
@@ -40,6 +41,7 @@
                         // uploadStatus.textContent = '上传中'
                     },
                     'FileUploaded': function (up, file, info) {
+                        window.eventHub.emit('afterUpload')
                         var domain = up.getOption('domain');
                         var response = JSON.parse(info.response);
                         var sourceLink = domain + '/' + encodeURIComponent(response.key);
