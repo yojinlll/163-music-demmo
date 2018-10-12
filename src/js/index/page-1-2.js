@@ -10,7 +10,7 @@
             </svg>
             {{song.singer}}
           </p>
-          <a class="playButton" href="#">
+          <a class="playButton" href="./song.html?id={{song.id}}">
             <svg class="icon icon-play">
               <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-play"></use>
             </svg>
@@ -21,11 +21,13 @@
       this.$el = $(this.el)
     },
     render(data){
-      let {songs} = data
+      // let {songs} = data
+      let songs = data.songs
       songs.map((song)=>{
-        let $li = $(this.template
+        let $li = $(this.template       // 将 模板定位符 替换 歌曲信息
           .replace('{{song.name}}', song.name)
           .replace('{{song.singer}}', song.singer)
+          .replace('{{song.id}}', song.id)
         )
         this.$el.find('ol.list').append($li)
       })
@@ -39,6 +41,7 @@
       var query = new AV.Query('Song');
       return query.find().then((songs)=>{
         this.data.songs = songs.map((song)=>{
+          // console.log(song.attributes)
           return {id: song.id, ...song.attributes}
         })
         return songs
