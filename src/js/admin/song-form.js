@@ -24,13 +24,19 @@
                 </label>
                 <input name="url" type="text" value="__url__">
             </div>
+            <div class="row">
+                <label>
+                    封面
+                </label>
+                <input name="cover" type="text" value="__cover__">
+            </div>
             <div class="row actions">
                 <button type="submit">保存</button>
             </div>
         </form>
         `,
         render(data = {}) {
-            let placeholders = ['name', 'url', 'singer', 'id']
+            let placeholders = ['name', 'url', 'singer', 'id', 'cover']
             let html = this.template
             placeholders.map((string) => {
                 html = html.replace(`__${string}__`, data[string] || '')        // __${string}__ 替换成 data[string]
@@ -48,15 +54,16 @@
     }
     let model = {
         data: {
-            name: '', singer: '', url: '', id: ''
+            name: '', singer: '', url: '', id: '', cover:''
         },
-        update(data){
+        update(data) {
             var song = AV.Object.createWithoutData('Song', this.data.id)
             song.set('name', data.name)
             song.set('singer', data.singer)
             song.set('url', data.url)
+            song.set('cover', data.cover)
             return song.save()
-                .then((response)=>{
+                .then((response) => {
                     Object.assign(this.data, data)
                     return response
                 })
@@ -67,6 +74,8 @@
             song.set('name', data.name);
             song.set('singer', data.singer);
             song.set('url', data.url);
+            song.set('cover', data.cover)
+
             return song.save().then((newSong) => {
                 let { id, attributes } = newSong
                 Object.assign(this.data, { id, ...attributes })
@@ -98,7 +107,7 @@
             })
         },
         create() {
-            let needs = 'name singer url'.split(' ')
+            let needs = 'name singer url cover'.split(' ')
             let data = {}
             needs.map((string) => {
                 data[string] = this.view.$el.find(`[name=${string}]`).val()
@@ -112,16 +121,16 @@
                 })
         },
         update() {
-            let needs = 'name singer url'.split(' ')
+            let needs = 'name singer url cover'.split(' ')
             let data = {}
             needs.map((string) => {
                 data[string] = this.view.$el.find(`[name=${string}]`).val()
             })
             this.model.update(data)
-                .then(()=>{
-                    window.eventHub.emit('update',JSON.parse(JSON.stringify(this.model.data)))
+                .then(() => {
+                    window.eventHub.emit('update', JSON.parse(JSON.stringify(this.model.data)))
                 })
-            
+
         },
         bindEvents() {       // 获取提交的字符串 name singer url
             this.view.$el.on('submit', 'form', (e) => {
