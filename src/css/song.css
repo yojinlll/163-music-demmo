@@ -53,6 +53,7 @@
 }
 .song-description .lines{
 	transition: transform 0.3s;
+	color: red;
 }
 .song-description .lyric{
 	height: 72px;

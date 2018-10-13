@@ -14,19 +14,34 @@
       }
       let audio = this.$el.find('audio')[0]
       audio.onended = () => { window.eventHub.emit('songEnd') }               // 调用 audio.onended 执行 songEnd 事件，去暂停转盘
-      
+      audio.ontimeupdate = ()=>{
+        console.log(audio.currentTime)
+      }
+
       if (status === 'playing') {
         this.$el.find('.disc-container').addClass('playing')
-      } else {
+      }else {
         this.$el.find('.disc-container').removeClass('playing')
       }
+
+      this.$el.find('.song-description > h1').text(song.name)
+
+      song.lyrics.split('\n').map((string) => {
+        let p = document.createElement('p')
+        let regex = /\[([\d:.]+)\](.+)/
+        let matches = string.match(regex)
+
+        if(matches){
+          p.textContent = matches[2]
+          p.setAttribute('data-time',  matches[1])
+        }else{
+          p.textContent = 'fuck'
+        }
+        this.$el.find('.lyric > .lines').append(p)
+      })
     },
-    play() {
-      this.$el.find('audio')[0].play()
-    },
-    pause() {
-      this.$el.find('audio')[0].pause()
-    }
+    play() { this.$el.find('audio')[0].play() },
+    pause() { this.$el.find('audio')[0].pause() }
   }
   let model = {
     data: {
